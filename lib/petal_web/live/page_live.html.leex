@@ -2,8 +2,10 @@
   <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
   <p>Peace of mind from prototype to production</p>
 
-  <form phx-change="suggest" phx-submit="search"  x-data="{ query: '' }">
+  <form phx-change="suggest" phx-submit="search"  x-data="{ query: '' }"
+  class="flex flex-col items-center">
     <input type="text" name="q" value="<%= @query %>"
+    class="p-6 max-w-sm mx-auto bg-white rounded-xl shadow-md space-x-4"
       placeholder="Live dependency search" list="results" autocomplete="off"
       x-model="query"
     />
@@ -12,7 +14,8 @@
         <option value="<%= app %>"><%= app %></option>
       <% end %>
     </datalist>
-    <button type="submit" phx-disable-with="Searching..." x-show="query !== ''">
+    <button type="submit" phx-disable-with="Searching..." x-show="query !== ''"
+      class="mx-auto border border-indigo-500 bg-indigo-500 text-white rounded-md px-4 py-2 m-2 transition duration-500 ease select-none hover:bg-indigo-600 focus:outline-none focus:shadow-outline">
       Go to Hexdocs
     </button>
   </form>
