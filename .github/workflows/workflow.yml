@@ -1,0 +1,89 @@
+name: Elixir CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  run-tests:
+    name: "Run Tests"
+    strategy:
+      matrix:
+        elixir: ['1.10.3']
+        otp: [22.2.7]
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        ports: ['5432:5432']
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: petal_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: "Checkout Repository"
+        uses: actions/checkout@v2
+
+      - name: "Setup Elixir"
+        uses: erlef/setup-elixir@v1
+        with:
+          otp-version: '22.2'
+          elixir-version: '1.10.3'
+
+      - name: Setup Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14.15.4
+
+      - name: Cache global mix
+        uses: actions/cache@v1
+        with:
+          path: ~/.mix
+          key: cache-${{ runner.os }}-mix-${{ matrix.otp }}-${{ matrix.elixir }}
+          restore-keys: cache-${{ runner.os }}-mix-
+
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: deps
+          key: cache-${{ runner.os }}-deps-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          restore-keys: cache-${{ runner.os }}-deps-
+
+      - uses: actions/cache@v1
+        id: build-cache
+        with:
+          path: _build
+          key: ${{ runner.os }}-build-${{ matrix.otp }}-${{ matrix.elixir }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+
+      - name: Find yarn cache location
+        id: yarn-cache
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.yarn-cache.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: |-
+          mix deps.get
+          mix deps.compile
+          (cd assets && yarn)
+
+      - name: Run Tests
+        run: mix test
+        env:
+          DB_USER: postgres
+          DB_PASS: postgres
+          DB_HOST: localhost
