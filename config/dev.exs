@@ -2,9 +2,9 @@ use Mix.Config
 
 # Configure your database
 config :petal, Petal.Repo,
-  username: System.get_env("DB_USER") || "postgres",
-  password: System.get_env("DB_PASS") || "password",
-  hostname: System.get_env("DB_HOST") || "postgres",
+  username: System.get_env("POSTGRES_USER") || "postgres",
+  password: System.get_env("POSTGRERS_PASSWORD") || "postgres",
+  hostname: System.get_env("POSTGRES_HOST") || "postgres",
   database: "petal_dev",
   show_sensitive_data_on_connection_error: true,
   pool_size: 10

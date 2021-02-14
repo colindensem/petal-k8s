@@ -1,0 +1,8 @@
+**/node_modules
+**/*.iml
+**/_build
+**/cover
+**/deps
+**/erl_crash.dump
+*.ez
+**/priv/static

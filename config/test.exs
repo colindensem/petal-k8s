@@ -6,9 +6,9 @@ use Mix.Config
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
 config :petal, Petal.Repo,
-  username: System.get_env("DB_USER") || "postgres",
-  password: System.get_env("DB_PASS") || "postgres",
-  hostname: System.get_env("DB_HOST") || "localhost",
+  username: System.get_env("POSTGRES_USER") || "postgres",
+  password: System.get_env("POSTGRES_PASSWORD") || "postgres",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
   database: "petal_test#{System.get_env("MIX_TEST_PARTITION")}",
   pool: Ecto.Adapters.SQL.Sandbox
 

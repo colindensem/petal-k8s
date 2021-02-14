@@ -9,8 +9,17 @@ defmodule Petal.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: [:phoenix, :gettext] ++ Mix.compilers(),
       start_permanent: Mix.env() == :prod,
+      deps: deps(),
       aliases: aliases(),
-      deps: deps()
+      releases: [
+        standard: [
+          version: "0.0.1",
+          applications: [
+            petal: :permanent
+          ],
+          runtime_config_path: "config/runtime.exs"
+        ]
+      ]
     ]
   end
 

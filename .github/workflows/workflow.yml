@@ -84,9 +84,9 @@ jobs:
       - name: Run Tests
         run: mix test
         env:
-          DB_USER: postgres
-          DB_PASS: postgres
-          DB_HOST: localhost
+          POSTGRES_USER: postgres
+          POSTGRESS_PASSWORD: postgres
+          POSTGRES_HOST: localhost
 
   build:
     needs: test

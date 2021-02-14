@@ -1,10 +1,7 @@
-version: '3'
-volumes:
-  node_modules:
-  build:
+version: '3.8'
 services:
-  postgres:
-    image: postgres:13.1
+  db:
+    image: postgres:13.1-alpine
     healthcheck:
       test: ['CMD', 'pg_isready', '-q', '-d', 'postgres', '-U', 'root']
       timeout: 45s
@@ -12,19 +9,17 @@ services:
       retries: 10
     restart: always
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - 5432:5432
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file: .env
-    command: mix phx.server
-    volumes:
-      - .:/app
-      # - node_modules:/app/assets/node_modules
-      - build:/app/_build
     ports:
-      - '4000:4000'
+      - 4001:4001
     depends_on:
-      - postgres
+      - db
