@@ -2,14 +2,14 @@ name: Elixir CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
-  run-tests:
-    name: "Run Tests"
+  test:
+    name: 'Run Tests'
     strategy:
       matrix:
         elixir: ['1.10.3']
@@ -30,10 +30,10 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - name: "Checkout Repository"
+      - name: 'Checkout Repository'
         uses: actions/checkout@v2
 
-      - name: "Setup Elixir"
+      - name: 'Setup Elixir'
         uses: erlef/setup-elixir@v1
         with:
           otp-version: '22.2'
@@ -87,3 +87,24 @@ jobs:
           DB_USER: postgres
           DB_PASS: postgres
           DB_HOST: localhost
+
+  build:
+    needs: test
+    name: Build, push, and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+
+      - name: Build container image
+        run: docker build -t summit360/petal .
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 600
+      - name: Tag image
+        run: docker tag summit360/petal registry.digitalocean.com/summit360/petal:$(echo $GITHUB_SHA | head -c7)
+      - name: Push image to DigitalOcean Container Registry
+        run: docker push registry.digitalocean.com/summit360/petal:$(echo $GITHUB_SHA | head -c7)
